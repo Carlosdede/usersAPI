@@ -12,11 +12,14 @@ type UpdateUserInput = {
   email: string;
 };
 
-type DeleteUserInput = {
+type InputById = {
   id: string;
 };
 
-export class UsersService {
+
+
+export class UsersService  {
+ 
   async create({ name, email }: CreateUserInput) {
     const existingUser = await db
       .select()
@@ -33,10 +36,20 @@ export class UsersService {
     const [user] = await db.insert(users).values({ name, email }).returning();
     return user;
   }
-  async listar() {
-    const listUser = await db.select().from(users);
-    return listUser;
+
+  async findAll() {
+    return db.select().from(users);
+   
   }
+
+  async findById({id}: InputById){
+    const existingUser = await db.select().from(users).where(eq(users.id, id))
+    if(existingUser.length === 0) {
+        throw new Error("usuário não encontrado!")
+    }
+    return existingUser
+  }
+
   async update({ id, name, email }: UpdateUserInput) {
     const existingUser = await db.select().from(users).where(eq(users.id, id));
     if (existingUser.length === 0) {
@@ -50,14 +63,14 @@ export class UsersService {
 
     return user;
   }
-  async delete({ id }: DeleteUserInput) {
+
+  async delete({ id }: InputById) {
     const existingUser = await db.select().from(users).where(eq(users.id, id));
     if (existingUser.length === 0) {
       throw new Error("Usuário não encontrado!");
     }
 
     const [user] = await db.delete(users).where(eq(users.id, id)).returning();
-
     return user;
   }
 }

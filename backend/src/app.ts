@@ -2,8 +2,12 @@ import Fastify from "fastify";
 import cors from "@fastify/cors"
 import swagger from "@fastify/swagger"
 import swaggerUi from "@fastify/swagger-ui"
-//import {usersRoutes} from "./routes/users-routes.js"
+import {usersRoutes} from "./routes/users-routes.js"
 
+
+type Error = {
+  message: string
+}
 
 export async function buildApp(){
     const app = Fastify()
@@ -45,7 +49,15 @@ export async function buildApp(){
 
 
 
-   // await app.register(usersRoutes, {prefix:'/users'})
+    await app.register(usersRoutes, {prefix:'/users'})
+
+    app.setErrorHandler((error: Error, _request, reply)=>{
+      console.error(error)
+
+      return reply.status(400).send({
+        message: error.message
+      })
+    })
 
     return app
 
